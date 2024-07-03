@@ -1,4 +1,4 @@
-package muoipt.core.network.api.article.di
+package muoipt.core.network.api.di
 
 import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerInterceptor

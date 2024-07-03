@@ -1,4 +1,4 @@
-package muoipt.core.network.api.article.model
+package muoipt.core.network.api.model
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
