@@ -55,6 +55,7 @@ dependencies {
 
     implementation(project(":network"))
     implementation(project(":data"))
+    implementation(project(":model"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -47,4 +47,6 @@ dependencies {
     kapt(libs.hilt.compiler)
 
     implementation(project(":network"))
+    implementation(project(":model"))
+
 }
