@@ -18,6 +18,8 @@ moshi = "1.13.0"
 okhttp = "4.9.3"
 chuckerLibrary = "3.5.2"
 
+room = "2.4.2"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -48,6 +50,10 @@ moshi-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.re
 okhttp3-okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp3-loggin-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
 chucker = { module = "com.github.chuckerteam.chucker:library", version.ref = "chuckerLibrary" }
+
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 
 
 [plugins]
