@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "NYTimesTopStories"
 include(":app")
- 
+include(":network")
