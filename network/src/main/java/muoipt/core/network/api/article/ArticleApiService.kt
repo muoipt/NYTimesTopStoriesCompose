@@ -1,6 +1,6 @@
 package muoipt.core.network.api.article
 
-import muoipt.core.network.api.model.ArticleResponse
+import muoipt.core.network.model.ArticleResponse
 import retrofit2.http.GET
 
 interface ArticleApiService {
