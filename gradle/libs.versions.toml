@@ -19,6 +19,8 @@ okhttp = "4.9.3"
 chuckerLibrary = "3.5.2"
 
 room = "2.4.2"
+coroutines = "1.6.4"
+
 
 
 [libraries]
@@ -54,6 +56,8 @@ chucker = { module = "com.github.chuckerteam.chucker:library", version.ref = "ch
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+
+coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 
 
 [plugins]

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "muoipt.data"
+    namespace = "muoipt.common"
     compileSdk = 34
 
     defaultConfig {
@@ -43,13 +43,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    implementation(libs.coroutines.android)
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
-
-    implementation(project(":network"))
-    implementation(project(":model"))
-    implementation(project(":database"))
-    implementation(project(":common"))
-
-
 }
