@@ -1,6 +1,7 @@
 package muoipt.model
 
 data class ArticleData(
+    val id: Int = 0,
     val section: String = "",
     val subsection: String = "",
     val title: String = "",
