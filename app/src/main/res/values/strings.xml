@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">NYTimesTopStories</string>
     <string name="error_no_internet_connection">No internet connection!</string>
+    <string name="error_no_articles">No article is found!</string>
 
 
 </resources>

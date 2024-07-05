@@ -19,7 +19,7 @@ class ArticlesListingViewModel @Inject constructor(
 ) {
     override fun handleAction(action: ArticlesListingAction) {
         when (action) {
-            is ArticlesListingAction.LoadArticlesAction -> {
+            is ArticlesListingAction.LoadArticles -> {
                 loadArticles()
             }
         }

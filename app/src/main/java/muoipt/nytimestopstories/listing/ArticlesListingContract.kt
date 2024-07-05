@@ -7,13 +7,15 @@ import muoipt.nytimestopstories.base.UIState
 import muoipt.nytimestopstories.base.VMState
 
 sealed class ArticlesListingAction: UIAction {
-    data object LoadArticlesAction: ArticlesListingAction()
+    data object LoadArticles: ArticlesListingAction()
 }
 
-sealed class ArticlesListingUIState: UIState {
+sealed class ArticlesListingUIState(
+    open val articlesList: List<ArticleUiData> = listOf()
+): UIState {
     data object Default: ArticlesListingUIState()
     data object Loading: ArticlesListingUIState()
-    class LoadArticlesSuccess(val articlesList: List<ArticleUiData>): ArticlesListingUIState()
+    class LoadArticlesSuccess(override val articlesList: List<ArticleUiData>): ArticlesListingUIState(articlesList)
     class Error(val error: ArticlesListingError): ArticlesListingUIState()
 }
 
