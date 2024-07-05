@@ -14,7 +14,8 @@ import javax.inject.Inject
 class ArticlesListingViewModel @Inject constructor(
     private val getArticlesListUseCase: GetArticlesListUseCase
 ): BaseViewModel<ArticlesListingAction, ArticlesListingUIState, ArticlesListingVMState>(
-    initUIState = ArticlesListingUIState.Default, initVMState = ArticlesListingVMState()
+    initUIState = ArticlesListingUIState.Default,
+    initVMState = ArticlesListingVMState()
 ) {
     override fun handleAction(action: ArticlesListingAction) {
         when (action) {

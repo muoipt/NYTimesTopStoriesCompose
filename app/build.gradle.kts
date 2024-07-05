@@ -75,4 +75,12 @@ dependencies {
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
+    implementation(libs.android.lifecycle.runtime.compose)
+
+    // todo check to remove material lib
+    implementation(libs.android.compose.material)
+    implementation(libs.android.compose.material3)
+    implementation(libs.android.constraintlayout.compose)
+    implementation(libs.timber)
 }
