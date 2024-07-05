@@ -36,6 +36,11 @@ android {
 
 dependencies {
 
+    implementation(project(":model"))
+    implementation(project(":common"))
+    implementation(project(":network"))
+    implementation(project(":database"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -45,11 +50,5 @@ dependencies {
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
-
-    implementation(project(":network"))
-    implementation(project(":model"))
-    implementation(project(":database"))
-    implementation(project(":common"))
-
 
 }

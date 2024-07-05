@@ -6,8 +6,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import muoipt.data.repositories.ArticleRepo
 import muoipt.data.repositories.ArticleRepoImpl
-import muoipt.data.usecases.GetArticleUseCase
-import muoipt.data.usecases.GetArticleUseCaseImpl
+import muoipt.data.usecases.GetArticlesListUseCase
+import muoipt.data.usecases.GetArticlesListUseCaseImpl
 
 
 @Module
@@ -17,5 +17,5 @@ interface DataModule {
     fun bindArticleRepo(articleRepoImpl: ArticleRepoImpl): ArticleRepo
 
     @Binds
-    fun bindGetArticleUseCase(getArticleUseCaseImpl: GetArticleUseCaseImpl): GetArticleUseCase
+    fun bindGetArticleUseCase(getArticleUseCaseImpl: GetArticlesListUseCaseImpl): GetArticlesListUseCase
 }
