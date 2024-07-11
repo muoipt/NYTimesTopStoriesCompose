@@ -1,47 +1,36 @@
 package muoipt.nytimestopstories
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
+import dagger.hilt.android.AndroidEntryPoint
+import muoipt.nytimestopstories.base.BaseActivity
+import muoipt.nytimestopstories.main.MainScreen
+import muoipt.nytimestopstories.navigation.AppState
+import muoipt.nytimestopstories.navigation.rememberAppState
 import muoipt.nytimestopstories.ui.theme.NYTimesTopStoriesTheme
 
-class MainActivity: ComponentActivity() {
+@AndroidEntryPoint
+class MainActivity: BaseActivity() {
+
+    private lateinit var navController: NavHostController
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             NYTimesTopStoriesTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                App(navController = navController)
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    NYTimesTopStoriesTheme {
-        Greeting("Android")
-    }
+fun App(
+    navController: NavHostController,
+    appState: AppState = rememberAppState(navController)
+) {
+    MainScreen(appState)
 }

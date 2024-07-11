@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.hilt.android)
+    alias(libs.plugins.kotlin.ksp)
     kotlin("kapt")
 }
 
@@ -11,6 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "muoipt.nytimestopstories"
+        multiDexEnabled = true
         minSdk = 28
         targetSdk = 34
         versionCode = 1
@@ -32,11 +34,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
     buildFeatures {
         compose = true
@@ -83,4 +85,11 @@ dependencies {
     implementation(libs.android.compose.material3)
     implementation(libs.android.constraintlayout.compose)
     implementation(libs.timber)
+
+    implementation("com.android.support:multidex:2.0.1")
+
+    implementation(libs.moshi.core)
+    ksp(libs.moshi.codegen)
+    implementation(libs.moshi.kotlin)
+
 }

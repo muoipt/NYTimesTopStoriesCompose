@@ -56,7 +56,6 @@ fun AppSnackBar(
         ) {
             CustomSnackBar(
                 message,
-                infoIcon,
                 backgroundColor
             ) {
                 scaffoldState.snackbarHostState
@@ -71,7 +70,6 @@ fun AppSnackBar(
 @Composable
 fun CustomSnackBar(
     message: String,
-    infoIcon: Int,
     backgroundColor: Color,
     onCloseClicked: () -> Unit
 ) {

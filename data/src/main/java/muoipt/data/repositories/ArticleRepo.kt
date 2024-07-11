@@ -1,11 +1,12 @@
 package muoipt.data.repositories
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import muoipt.common.IoDispatcher
+//import muoipt.common.IoDispatcher
 import muoipt.core.network.api.article.ArticleApiInterface
 import muoipt.core.network.model.Article
 import muoipt.data.common.DataStrategy
@@ -23,7 +24,7 @@ interface ArticleRepo {
 class ArticleRepoImpl @Inject constructor(
     private val articleRemoteApi: ArticleApiInterface,
     private val articleLocalApi: ArticleDao,
-    @IoDispatcher private val dispatcher: CoroutineDispatcher
+//    @IoDispatcher private val dispatcher: CoroutineDispatcher
 ): ArticleRepo {
     override suspend fun getArticles(strategy: DataStrategy): Flow<List<ArticleData>> {
         val willFetchFromRemote = when (strategy) {
@@ -36,7 +37,7 @@ class ArticleRepoImpl @Inject constructor(
         return articleLocalApi.getAll()
             .onStart { if (willFetchFromRemote) fetchArticles() }
             .map { response -> response.map { it.toDataModel() } }
-            .flowOn(dispatcher)
+            .flowOn(Dispatchers.IO)
     }
 
     private suspend fun fetchArticles() {

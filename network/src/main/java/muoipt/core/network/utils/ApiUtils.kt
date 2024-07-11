@@ -17,10 +17,8 @@ object ApiUtils {
 }
 
 class ApiException(
-    val code: Int,
-    val httpError: String,
     message: String, // "error" extracted from rawCause
-    val rawCause: String, // Full error body from the response
+    // Full error body from the response
 ): Exception(message) {
     companion object {
         fun from(exception: HttpException): ApiException {
@@ -29,9 +27,6 @@ class ApiException(
             val cause = json.getString(KEY_ERROR) as String
 
             return ApiException(
-                code = exception.code(),
-                httpError = exception.message(),
-                rawCause = rawCause,
                 message = cause,
             )
         }

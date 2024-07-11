@@ -5,11 +5,14 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
+import muoipt.database.converters.ListConverter
 
 @Entity(
     tableName = "article",
-    indices = [Index("room_id")]
+    indices = [Index("id")]
 )
+@TypeConverters(ListConverter::class)
 data class ArticleEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")

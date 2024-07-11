@@ -3,7 +3,9 @@ package muoipt.database
 import android.content.Context
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import muoipt.database.ArticleDb.Companion.DB_VERSION
+import muoipt.database.converters.ListConverter
 import muoipt.database.dao.ArticleDaoImpl
 import muoipt.database.entity.ArticleEntity
 

@@ -35,7 +35,7 @@ fun ArticlesListingScreen(
         else -> {}
     }
 
-    BaseUi(content = { SetupUi(articlesList) }, snackBarMessage = getErrorMessage(state))
+    BaseUi(content = { SetupUi() }, snackBarMessage = getErrorMessage(state))
 }
 
 @Composable
@@ -60,6 +60,6 @@ fun getErrorMessage(state: UIState): String? {
 }
 
 @Composable
-fun SetupUi(articlesList: List<ArticleUiData>) {
+fun SetupUi() {
 
 }
