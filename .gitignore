@@ -32,3 +32,16 @@ google-services.json
 # Android Profiling
 *.hprof
 .DS_Store
+*.jar
+.gradle
+/build
+/captures
+.externalNativeBuild
+.cxx
+.idea
+.idea/inspectionProfiles/Project_Default.xml
+.idea/deploymentTargetDropDown.xml
+caches/
+daemon/
+wrapper/
+native/
