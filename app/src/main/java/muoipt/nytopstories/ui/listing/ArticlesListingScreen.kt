@@ -17,8 +17,10 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -28,9 +30,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
+import muoipt.nyt.data.common.AppLog
 import muoipt.nyt.data.common.ArticleErrorCode
 import muoipt.nyt.model.MultimediaData
 import muoipt.nytopstories.R
@@ -42,9 +44,12 @@ import muoipt.nytopstories.ui.components.CircleProgressBar
 fun ArticlesListingScreen(
     modifier: Modifier, viewModel: ArticlesListingViewModel = hiltViewModel()
 ) {
-    val state by viewModel.uiStates.collectAsStateWithLifecycle()
+    val state by viewModel.uiStates.collectAsState()
+    val uiState = state as? ArticlesListingUIState
 
-    val articlesList = (state as? ArticlesListingUIState)?.articlesList ?: emptyList()
+    val articlesList by remember(uiState?.articlesList) {
+        derivedStateOf { uiState?.articlesList ?: listOf() }
+    }
 
     when (state) {
         is ArticlesListingUIState.Default -> {
@@ -90,34 +95,42 @@ fun getErrorMessage(state: UIState): String? {
 
 @Composable
 fun SetupUi(
-    modifier: Modifier, articlesList: List<ArticleUiData>, onBookmarkUpdate: (articleId: Int) -> Unit
+    modifier: Modifier,
+    articlesList: List<ArticleUiData>,
+    onBookmarkUpdate: (articleId: Int) -> Unit
 ) {
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
-    LazyColumn(
-        state = listState,
-        modifier = modifier
-            .fillMaxWidth()
-    ) {
-
-        items(articlesList.size) { index ->
-            ArticleItemView(articlesList[index], onBookmarkUpdate)
-        }
-    }
-
     LaunchedEffect(articlesList) {
+        AppLog.listing("listState.firstVisibleItemIndex = ${listState.firstVisibleItemIndex}")
         coroutineScope.launch {
-            listState.scrollToItem(
+            listState.animateScrollToItem(
                 listState.firstVisibleItemIndex,
                 listState.firstVisibleItemScrollOffset
             )
+        }
+    }
+
+    LazyColumn(
+        state = listState,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        items(articlesList.size) { index ->
+            ArticleItemView(articlesList[index], onBookmarkUpdate)
         }
     }
 }
 
 @Composable
 fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (articleId: Int) -> Unit) {
+
+    val bookmarkStatus = remember(articleUiData) {
+        mutableStateOf(articleUiData.isBookmarked)
+    }
+
+    val currentBookmarkStatus = bookmarkStatus.value
+
     Column(modifier = Modifier.fillMaxWidth()) {
         articleUiData.multimedia?.firstOrNull()?.url.let { imageUrl ->
             AsyncImage(
@@ -138,8 +151,11 @@ fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (articleId: 
                 color = Color.DarkGray, text = articleUiData.updatedDate
             )
             Icon(
-                modifier = Modifier.clickable { onBookmarkUpdate(articleUiData.id) },
-                imageVector = if (articleUiData.isBookmarked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                modifier = Modifier.clickable {
+                    bookmarkStatus.value = !currentBookmarkStatus
+                    onBookmarkUpdate(articleUiData.id)
+                },
+                imageVector = if (bookmarkStatus.value) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                 contentDescription = "favorite"
             )
         }

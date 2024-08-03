@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.withContext
 import muoipt.common.IoDispatcher
 import muoipt.nyt.data.common.AppLog
 import muoipt.nyt.data.common.ArticleError
@@ -44,21 +45,23 @@ class ArticleRepoImpl @Inject constructor(
     }
 
     override suspend fun updateBookmarkedArticle(articleId: Int) {
-        AppLog.listing("ArticleRepoImpl saveBookmarkedArticle articleId = $articleId")
+        withContext(ioDispatcher) {
+            AppLog.listing("ArticleRepoImpl saveBookmarkedArticle articleId = $articleId")
 
-        val article = articleLocalApi.getById(articleId).firstOrNull()
-            ?: throw ArticleError(ArticleErrorCode.BookmarkArticleNotFound)
+            val article = articleLocalApi.getById(articleId).firstOrNull()
+                ?: throw ArticleError(ArticleErrorCode.BookmarkArticleNotFound)
 
-        AppLog.listing("ArticleRepoImpl saveBookmarkedArticle article = $article")
+            AppLog.listing("ArticleRepoImpl saveBookmarkedArticle article = ${article.toDataModel().toDisplayString()}")
 
-        val currentBookmarkStatus = (article.isBookmarked == 1)
-        val newBookmarkStatus = !currentBookmarkStatus
+            val currentBookmarkStatus = (article.isBookmarked == 1)
+            val newBookmarkStatus = !currentBookmarkStatus
 
-        val newArticle = article.copy(isBookmarked = if(newBookmarkStatus) 1 else 0)
+            val newArticle = article.copy(isBookmarked = if (newBookmarkStatus) 1 else 0)
 
-        AppLog.listing("ArticleRepoImpl saveBookmarkedArticle newArticle = $newArticle")
+            AppLog.listing("ArticleRepoImpl saveBookmarkedArticle newArticle = ${newArticle.toDataModel().toDisplayString()}")
 
-        articleLocalApi.upsert(newArticle)
+            articleLocalApi.upsert(newArticle)
+        }
     }
 
     private suspend fun fetchArticles() {

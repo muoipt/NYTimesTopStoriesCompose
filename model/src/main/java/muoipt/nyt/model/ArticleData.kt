@@ -21,4 +21,8 @@ data class ArticleData(
     val multimedia: List<MultimediaData>? = null,
     val shortUrl: String = "",
     val isBookmarked: Boolean = false
-)
+){
+    fun toDisplayString(): String{
+        return "id = $id - title = $title - isBookmarked = $isBookmarked"
+    }
+}
