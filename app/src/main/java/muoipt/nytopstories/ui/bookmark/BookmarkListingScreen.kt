@@ -1,13 +1,17 @@
-package muoipt.nytopstories.ui.listing
+package muoipt.nytopstories.ui.bookmark
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Icon
@@ -27,8 +31,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
@@ -41,52 +47,68 @@ import muoipt.nytopstories.ui.base.UIState
 import muoipt.nytopstories.ui.components.CircleProgressBar
 
 @Composable
-fun ArticlesListingScreen(
-    modifier: Modifier, viewModel: ArticlesListingViewModel = hiltViewModel()
+fun BookmarkListingScreen(
+    modifier: Modifier, viewModel: BookmarkListingViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiStates.collectAsState()
-    val uiState = state as? ArticlesListingUIState
+    val uiState = state as? BookmarkListingUIState
 
     val articlesList by remember(uiState?.articlesList) {
         derivedStateOf { uiState?.articlesList ?: listOf() }
     }
 
     when (state) {
-        is ArticlesListingUIState.Default -> {
+        is BookmarkListingUIState.Default -> {
             LaunchedEffect(Unit) {
-                viewModel.sendAction(ArticlesListingAction.LoadArticles)
+                viewModel.sendAction(BookmarkListingAction.LoadBookmark)
             }
         }
 
-        is ArticlesListingUIState.Loading -> {
+        is BookmarkListingUIState.Loading -> {
             CircleProgressBar()
+        }
+
+        is BookmarkListingUIState.Empty -> {
+            EmptyBookmarkUi(modifier)
+        }
+
+        is BookmarkListingUIState.LoadBookmarkSuccess -> {
+            BaseUi(content = {
+                SetupUi(modifier, articlesList) {
+                    viewModel.sendAction(BookmarkListingAction.UpdateBookmarkArticle(it))
+                }
+            }, snackBarMessage = null)
+        }
+
+        is BookmarkListingUIState.Error -> {
+            BaseUi(content = {
+                SetupUi(modifier, articlesList) {
+                    viewModel.sendAction(BookmarkListingAction.UpdateBookmarkArticle(it))
+                }
+            }, snackBarMessage = getErrorMessage(state as BookmarkListingUIState.Error))
         }
 
         else -> {}
     }
-
-    BaseUi(content = {
-        SetupUi(modifier, articlesList) {
-            viewModel.sendAction(ArticlesListingAction.UpdateBookmarkArticle(it))
-        }
-    }, snackBarMessage = getErrorMessage(state))
 }
 
 @Composable
-private fun getErrorMessage(state: UIState): String? {
-    val loadArticlesNotFoundErrorMsg = stringResource(id = R.string.error_no_articles)
+private fun EmptyBookmarkUi(modifier: Modifier) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(
+            modifier = Modifier.padding(16.dp),
+            color = Color.Black,
+            text = stringResource(id = R.string.error_no_bookmark),
+            style = TextStyle(fontSize = 24.sp)
+        )
+    }
+}
 
+@Composable
+private fun getErrorMessage(state: BookmarkListingUIState.Error): String? {
     val errorMessage by remember(state) {
         derivedStateOf {
-            if (state is ArticlesListingUIState.Error) {
-                when (state.error.errorCode) {
-                    ArticleErrorCode.LoadArticlesNotFound -> loadArticlesNotFoundErrorMsg
-                    else -> {
-                        state.error.errorMessage
-                    }
-                }
-
-            } else null
+            state.error.errorMessage
         }
     }
 
@@ -129,21 +151,26 @@ private fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (art
         mutableStateOf(articleUiData.isBookmarked)
     }
 
-    val currentBookmarkStatus = bookmarkStatus.value
-
     Column(modifier = Modifier.fillMaxWidth()) {
-        articleUiData.multimedia?.firstOrNull()?.url.let { imageUrl ->
-            AsyncImage(
-                model = imageUrl, contentDescription = null, modifier = Modifier.fillMaxWidth()
-            )
-        }
-        Text(
-            modifier = Modifier.padding(16.dp), color = Color.Black, text = articleUiData.title
-        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+        ) {
+            articleUiData.multimedia?.firstOrNull()?.url.let { imageUrl ->
+                AsyncImage(
+                    model = imageUrl, contentDescription = null, modifier = Modifier.width(150.dp)
+                )
+            }
+            Text(
+                modifier = Modifier.padding(16.dp), color = Color.Black, text = articleUiData.title
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(top = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -152,7 +179,6 @@ private fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (art
             )
             Icon(
                 modifier = Modifier.clickable {
-                    bookmarkStatus.value = !currentBookmarkStatus
                     onBookmarkUpdate(articleUiData.id)
                 },
                 imageVector = if (bookmarkStatus.value) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
@@ -160,7 +186,16 @@ private fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (art
             )
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .height(1.dp)
+                .background(color = Color.Gray)
+        )
         Spacer(modifier = Modifier.height(16.dp))
+
     }
 }
 

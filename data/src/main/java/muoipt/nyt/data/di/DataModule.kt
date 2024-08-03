@@ -10,6 +10,8 @@ import muoipt.nyt.data.usecases.BookmarkArticleUseCase
 import muoipt.nyt.data.usecases.BookmarkArticleUseCaseImpl
 import muoipt.nyt.data.usecases.GetArticlesListUseCase
 import muoipt.nyt.data.usecases.GetArticlesListUseCaseImpl
+import muoipt.nyt.data.usecases.GetBookmarkListUseCase
+import muoipt.nyt.data.usecases.GetBookmarkListUseCaseImpl
 
 
 @Module
@@ -23,4 +25,8 @@ interface DataModule {
 
     @Binds
     fun bindBookmarkArticleUseCase(bookmarkArticleUseCaseImpl: BookmarkArticleUseCaseImpl): BookmarkArticleUseCase
+
+    @Binds
+    fun bindGetBookmarkListUseCase(getBookmarkListUseCaseImpl: GetBookmarkListUseCaseImpl): GetBookmarkListUseCase
+
 }

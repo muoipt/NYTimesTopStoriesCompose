@@ -23,6 +23,7 @@ import javax.inject.Inject
 interface ArticleRepo {
     fun getArticles(strategy: DataStrategy = DataStrategy.AUTO): Flow<List<ArticleData>>
     suspend fun updateBookmarkedArticle(articleId: Int)
+    fun getBookmarkArticles(strategy: DataStrategy = DataStrategy.AUTO): Flow<List<ArticleData>?>
 }
 
 class ArticleRepoImpl @Inject constructor(
@@ -62,6 +63,12 @@ class ArticleRepoImpl @Inject constructor(
 
             articleLocalApi.upsert(newArticle)
         }
+    }
+
+    override fun getBookmarkArticles(strategy: DataStrategy): Flow<List<ArticleData>?> {
+        return articleLocalApi.getAllBookmark()
+            .map { response -> response?.map { it.toDataModel() } }
+            .flowOn(ioDispatcher)
     }
 
     private suspend fun fetchArticles() {

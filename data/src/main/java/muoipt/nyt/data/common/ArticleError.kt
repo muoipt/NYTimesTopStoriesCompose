@@ -3,6 +3,8 @@ package muoipt.nyt.data.common
 enum class ArticleErrorCode {
     LoadArticlesException,
     LoadArticlesNotFound,
+    LoadBookmarkNotFound,
+    LoadBookmarkException,
     BookmarkArticleNotFound,
     BookmarkArticleException
 }

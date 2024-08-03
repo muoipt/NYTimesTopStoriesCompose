@@ -35,7 +35,7 @@ class ArticlesListingViewModel @Inject constructor(
 
     private fun loadArticles() {
         viewModelScope.launch(CoroutineExceptionHandler { _, exception ->
-            AppLog.listing("saveBookmarkedArticle exception = $exception")
+            AppLog.listing("loadArticles exception = $exception")
 
             if (exception is ArticleError) {
                 vmStates.update {
@@ -82,7 +82,7 @@ class ArticlesListingViewModel @Inject constructor(
 
     private fun updateBookmarkArticle(articleId: Int) {
         viewModelScope.launch(CoroutineExceptionHandler { _, exception ->
-            AppLog.listing("saveBookmarkedArticle exception = $exception")
+            AppLog.listing("updateBookmarkArticle exception = $exception")
 
             if (exception is ArticleError) {
                 vmStates.update {
@@ -99,7 +99,7 @@ class ArticlesListingViewModel @Inject constructor(
                 }
             }
         }) {
-            AppLog.listing("saveBookmarkedArticle articleId = $articleId")
+            AppLog.listing("updateBookmarkArticle articleId = $articleId")
             bookmarkArticleUseCase.updateBookmarkArticle(articleId)
         }
     }
