@@ -26,10 +26,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import muoipt.nyt.data.common.AppLog
@@ -39,6 +41,7 @@ import muoipt.nytopstories.R
 import muoipt.nytopstories.ui.base.BaseUi
 import muoipt.nytopstories.ui.base.UIState
 import muoipt.nytopstories.ui.components.CircleProgressBar
+import muoipt.nytopstories.ui.components.OnLifecycleEvent
 
 @Composable
 fun ArticlesListingScreen(
@@ -70,6 +73,16 @@ fun ArticlesListingScreen(
             viewModel.sendAction(ArticlesListingAction.UpdateBookmarkArticle(it))
         }
     }, snackBarMessage = getErrorMessage(state))
+
+    OnLifecycleEvent(LocalLifecycleOwner.current) { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_RESUME -> {
+                viewModel.sendAction(ArticlesListingAction.LoadArticles)
+            }
+
+            else -> {}
+        }
+    }
 }
 
 @Composable
@@ -129,7 +142,9 @@ private fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (art
         mutableStateOf(articleUiData.isBookmarked)
     }
 
+    AppLog.listing("bookmarkStatus = $bookmarkStatus")
     val currentBookmarkStatus = bookmarkStatus.value
+    AppLog.listing("currentBookmarkStatus = $currentBookmarkStatus")
 
     Column(modifier = Modifier.fillMaxWidth()) {
         articleUiData.multimedia?.firstOrNull()?.url.let { imageUrl ->
@@ -154,6 +169,8 @@ private fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (art
                 modifier = Modifier.clickable {
                     bookmarkStatus.value = !currentBookmarkStatus
                     onBookmarkUpdate(articleUiData.id)
+                    AppLog.listing("new bookmarkStatus.value = ${bookmarkStatus.value}")
+
                 },
                 imageVector = if (bookmarkStatus.value) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                 contentDescription = "favorite"

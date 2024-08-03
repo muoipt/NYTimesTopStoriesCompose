@@ -52,14 +52,22 @@ class ArticleRepoImpl @Inject constructor(
             val article = articleLocalApi.getById(articleId).firstOrNull()
                 ?: throw ArticleError(ArticleErrorCode.BookmarkArticleNotFound)
 
-            AppLog.listing("ArticleRepoImpl saveBookmarkedArticle article = ${article.toDataModel().toDisplayString()}")
+            AppLog.listing(
+                "ArticleRepoImpl saveBookmarkedArticle article = ${
+                    article.toDataModel().toDisplayString()
+                }"
+            )
 
             val currentBookmarkStatus = (article.isBookmarked == 1)
             val newBookmarkStatus = !currentBookmarkStatus
 
             val newArticle = article.copy(isBookmarked = if (newBookmarkStatus) 1 else 0)
 
-            AppLog.listing("ArticleRepoImpl saveBookmarkedArticle newArticle = ${newArticle.toDataModel().toDisplayString()}")
+            AppLog.listing(
+                "ArticleRepoImpl saveBookmarkedArticle newArticle = ${
+                    newArticle.toDataModel().toDisplayString()
+                }"
+            )
 
             articleLocalApi.upsert(newArticle)
         }
@@ -72,8 +80,6 @@ class ArticleRepoImpl @Inject constructor(
     }
 
     private suspend fun fetchArticles() {
-        articleLocalApi.deleteAll()
-
         val remoteResponse = articleRemoteApi.getArticles()
         val articleEntities = remoteResponse.results.map { it.toEntity() }
 
