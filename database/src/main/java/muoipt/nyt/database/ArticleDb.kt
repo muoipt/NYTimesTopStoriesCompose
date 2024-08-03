@@ -18,7 +18,7 @@ abstract class ArticleDb: RoomDatabase() {
     abstract fun articleDao(): ArticleDaoImpl
 
     companion object {
-        const val DB_VERSION = 2
+        const val DB_VERSION = 3
 
         private const val DB_NAME = "NYTArticleDb"
 

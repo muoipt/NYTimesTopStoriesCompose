@@ -9,7 +9,7 @@ interface ArticleDao: BaseDao<ArticleEntity> {
 
     fun getById(id: Int): Flow<ArticleEntity?>
 
-    fun deleteAll()
+    suspend fun deleteAll()
 }
 
 @Dao
@@ -21,5 +21,5 @@ abstract class ArticleDaoImpl: ArticleDao {
     abstract override fun getById(id: Int): Flow<ArticleEntity?>
 
     @androidx.room.Query("DELETE FROM article")
-    abstract override fun deleteAll()
+    abstract override suspend fun deleteAll()
 }

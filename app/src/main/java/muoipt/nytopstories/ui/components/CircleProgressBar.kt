@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 fun CircleProgressBar(
     modifier: Modifier = Modifier.fillMaxSize(),
     size: Dp = 30.dp,
-    color: Color = Color.Gray,
+    color: Color = Color.Blue,
     strokeWidth: Dp = 3.dp
 ) {
     Box(

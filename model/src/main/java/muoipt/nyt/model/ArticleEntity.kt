@@ -65,7 +65,10 @@ data class ArticleEntity(
     val multimedia: List<MultimediaEntity>? = null,
 
     @ColumnInfo(name = "shortUrl")
-    val shortUrl: String = ""
+    val shortUrl: String = "",
+
+    @ColumnInfo(name = "isBookmarked")
+    val isBookmarked: Int = 0
 )
 
 @JsonClass(generateAdapter = true)

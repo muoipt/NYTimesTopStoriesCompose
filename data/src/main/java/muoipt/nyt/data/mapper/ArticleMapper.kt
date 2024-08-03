@@ -40,6 +40,7 @@ fun Multimedia.toEntity() = MultimediaEntity(
 )
 
 fun ArticleEntity.toDataModel() = ArticleData(
+    id = id,
     section = section,
     subsection = subsection,
     title = title,
@@ -57,7 +58,8 @@ fun ArticleEntity.toDataModel() = ArticleData(
     perFacet = perFacet,
     geoFacet = geoFacet,
     multimedia = multimedia?.map { it.toDataModel() },
-    shortUrl = shortUrl
+    shortUrl = shortUrl,
+    isBookmarked = isBookmarked == 1
 )
 
 fun MultimediaEntity.toDataModel() = MultimediaData(

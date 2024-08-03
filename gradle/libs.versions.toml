@@ -1,5 +1,7 @@
 [versions]
 agp = "8.5.1"
+coilCompose = "2.4.0"
+glide = "4.15.1"
 hiltAndroid = "2.48.1"
 hiltNavigationCompose = "1.2.0"
 kotlin = "1.9.24"
@@ -29,6 +31,7 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
@@ -58,7 +61,6 @@ android-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-run
 android-compose-material = { module = "androidx.compose.material:material" }
 android-compose-material3 = { module = "androidx.compose.material3:material3" }
 android-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintLayoutCompose" }
-timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 
 
 [plugins]

@@ -19,5 +19,6 @@ data class ArticleData(
     val perFacet: List<String> = listOf(),
     val geoFacet: List<String> = listOf(),
     val multimedia: List<MultimediaData>? = null,
-    val shortUrl: String = ""
+    val shortUrl: String = "",
+    val isBookmarked: Boolean = false
 )

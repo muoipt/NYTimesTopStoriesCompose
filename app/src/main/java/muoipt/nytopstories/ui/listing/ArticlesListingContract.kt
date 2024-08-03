@@ -1,5 +1,6 @@
 package muoipt.nytopstories.ui.listing
 
+import muoipt.nyt.data.common.ArticleError
 import muoipt.nyt.model.ArticleData
 import muoipt.nyt.model.MultimediaData
 import muoipt.nytopstories.ui.base.UIAction
@@ -8,6 +9,7 @@ import muoipt.nytopstories.ui.base.VMState
 
 sealed class ArticlesListingAction: UIAction {
     data object LoadArticles: ArticlesListingAction()
+    data class UpdateBookmarkArticle(val articleId: Int): ArticlesListingAction()
 }
 
 sealed class ArticlesListingUIState(
@@ -16,13 +18,13 @@ sealed class ArticlesListingUIState(
     data object Default: ArticlesListingUIState()
     data object Loading: ArticlesListingUIState()
     class LoadArticlesSuccess(override val articlesList: List<ArticleUiData>): ArticlesListingUIState(articlesList)
-    class Error(val error: ArticlesListingError): ArticlesListingUIState()
+    class Error(val error: ArticleError): ArticlesListingUIState()
 }
 
 data class ArticlesListingVMState(
     val vmData: ArticleVMData = ArticleVMData(),
     val isLoading: Boolean = false,
-    val error: ArticlesListingError? = null
+    val error: ArticleError? = null
 ): VMState() {
     override fun toUIState(): ArticlesListingUIState {
         val uiData = vmData.toUiData()
@@ -42,6 +44,8 @@ data class ArticleUiData(
     val url: String = "",
     val byline: String = "",
     val multimedia: List<MultimediaData>? = null,
+    val updatedDate: String = "",
+    val isBookmarked: Boolean = false
 )
 
 data class ArticleVMData(
@@ -54,17 +58,9 @@ data class ArticleVMData(
             title = it.title,
             url = it.url,
             byline = it.byline,
-            multimedia = it.multimedia
+            multimedia = it.multimedia,
+            updatedDate = it.updatedDate,
+            isBookmarked = it.isBookmarked
         )
     }
 }
-
-enum class ArticlesListingErrorCode {
-    LoadArticlesException,
-    LoadArticlesNotFound
-}
-
-data class ArticlesListingError(
-    val errorCode: ArticlesListingErrorCode,
-    val errorMessage: String? = null
-)

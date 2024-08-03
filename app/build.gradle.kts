@@ -103,10 +103,11 @@ dependencies {
     implementation(libs.android.compose.material)
     implementation(libs.android.compose.material3)
     implementation(libs.android.constraintlayout.compose)
-    implementation(libs.timber)
     implementation(libs.androidx.navigation.compose)
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
     implementation(libs.hilt.navigation.compose)
+
+    implementation(libs.coil.compose)
 }
