@@ -47,3 +47,4 @@ wrapper/
 native/
 .tmp/
 jdks/
+*.profile
