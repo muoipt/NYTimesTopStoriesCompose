@@ -29,7 +29,7 @@ class BookmarkListingViewModel @Inject constructor(
             }
 
             is BookmarkListingAction.UpdateBookmarkArticle -> {
-                updateBookmarkArticle(action.articleId)
+                updateBookmarkArticle(action.articleTitle)
             }
         }
     }
@@ -83,7 +83,7 @@ class BookmarkListingViewModel @Inject constructor(
         }
     }
 
-    private fun updateBookmarkArticle(articleId: Int) {
+    private fun updateBookmarkArticle(articleTitle: String) {
         viewModelScope.launch(CoroutineExceptionHandler { _, exception ->
             AppLog.listing("updateBookmarkArticle exception = $exception")
 
@@ -101,8 +101,8 @@ class BookmarkListingViewModel @Inject constructor(
                 }
             }
         }) {
-            AppLog.listing("updateBookmarkArticle articleId = $articleId")
-            bookmarkArticleUseCase.updateBookmarkArticle(articleId)
+            AppLog.listing("updateBookmarkArticle articleTitle = $articleTitle")
+            bookmarkArticleUseCase.updateBookmarkArticle(articleTitle)
         }
     }
 }

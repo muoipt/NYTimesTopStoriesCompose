@@ -39,11 +39,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import muoipt.nyt.data.common.AppLog
-import muoipt.nyt.data.common.ArticleErrorCode
 import muoipt.nyt.model.MultimediaData
 import muoipt.nytopstories.R
 import muoipt.nytopstories.ui.base.BaseUi
-import muoipt.nytopstories.ui.base.UIState
 import muoipt.nytopstories.ui.components.CircleProgressBar
 
 @Composable
@@ -119,7 +117,7 @@ private fun getErrorMessage(state: BookmarkListingUIState.Error): String? {
 private fun SetupUi(
     modifier: Modifier,
     articlesList: List<ArticleUiData>,
-    onBookmarkUpdate: (articleId: Int) -> Unit
+    onBookmarkUpdate: (articleTitle: String) -> Unit
 ) {
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -145,7 +143,7 @@ private fun SetupUi(
 }
 
 @Composable
-private fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (articleId: Int) -> Unit) {
+private fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (articleTitle: String) -> Unit) {
 
     val bookmarkStatus = remember(articleUiData) {
         mutableStateOf(articleUiData.isBookmarked)
@@ -179,7 +177,7 @@ private fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (art
             )
             Icon(
                 modifier = Modifier.clickable {
-                    onBookmarkUpdate(articleUiData.id)
+                    onBookmarkUpdate(articleUiData.title)
                 },
                 imageVector = if (bookmarkStatus.value) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                 contentDescription = "favorite"

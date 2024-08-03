@@ -1,7 +1,6 @@
 package muoipt.nyt.model
 
 data class ArticleData(
-    val id: Int = 0,
     val section: String = "",
     val subsection: String = "",
     val title: String = "",
@@ -23,6 +22,6 @@ data class ArticleData(
     val isBookmarked: Boolean = false
 ){
     fun toDisplayString(): String{
-        return "id = $id - title = $title - isBookmarked = $isBookmarked"
+        return "title = $title - isBookmarked = $isBookmarked"
     }
 }

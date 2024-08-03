@@ -8,8 +8,8 @@ import muoipt.nytopstories.ui.base.UIState
 import muoipt.nytopstories.ui.base.VMState
 
 sealed class ArticlesListingAction: UIAction {
-    data object LoadArticles: ArticlesListingAction()
-    data class UpdateBookmarkArticle(val articleId: Int): ArticlesListingAction()
+    data class LoadArticles(val withRefresh: Boolean): ArticlesListingAction()
+    data class UpdateBookmarkArticle(val articleTitle: String): ArticlesListingAction()
 }
 
 sealed class ArticlesListingUIState(
@@ -38,9 +38,8 @@ data class ArticlesListingVMState(
 }
 
 data class ArticleUiData(
-    val id: Int = 0,
-    val section: String = "",
     val title: String = "",
+    val section: String = "",
     val url: String = "",
     val byline: String = "",
     val multimedia: List<MultimediaData>? = null,
@@ -53,9 +52,8 @@ data class ArticleVMData(
 ) {
     fun toUiData() = articles.map {
         ArticleUiData(
-            id = it.id,
-            section = it.section,
             title = it.title,
+            section = it.section,
             url = it.url,
             byline = it.byline,
             multimedia = it.multimedia,

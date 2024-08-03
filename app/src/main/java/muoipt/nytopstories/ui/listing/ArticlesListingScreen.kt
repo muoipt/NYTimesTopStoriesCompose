@@ -57,7 +57,7 @@ fun ArticlesListingScreen(
     when (state) {
         is ArticlesListingUIState.Default -> {
             LaunchedEffect(Unit) {
-                viewModel.sendAction(ArticlesListingAction.LoadArticles)
+                viewModel.sendAction(ArticlesListingAction.LoadArticles(true))
             }
         }
 
@@ -77,7 +77,7 @@ fun ArticlesListingScreen(
     OnLifecycleEvent(LocalLifecycleOwner.current) { _, event ->
         when (event) {
             Lifecycle.Event.ON_RESUME -> {
-                viewModel.sendAction(ArticlesListingAction.LoadArticles)
+                viewModel.sendAction(ArticlesListingAction.LoadArticles(false))
             }
 
             else -> {}
@@ -110,7 +110,7 @@ private fun getErrorMessage(state: UIState): String? {
 private fun SetupUi(
     modifier: Modifier,
     articlesList: List<ArticleUiData>,
-    onBookmarkUpdate: (articleId: Int) -> Unit
+    onBookmarkUpdate: (articleTitle: String) -> Unit
 ) {
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -136,7 +136,7 @@ private fun SetupUi(
 }
 
 @Composable
-private fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (articleId: Int) -> Unit) {
+private fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (articleTitle: String) -> Unit) {
 
     val bookmarkStatus = remember(articleUiData) {
         mutableStateOf(articleUiData.isBookmarked)
@@ -168,7 +168,7 @@ private fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (art
             Icon(
                 modifier = Modifier.clickable {
                     bookmarkStatus.value = !currentBookmarkStatus
-                    onBookmarkUpdate(articleUiData.id)
+                    onBookmarkUpdate(articleUiData.title)
                     AppLog.listing("new bookmarkStatus.value = ${bookmarkStatus.value}")
 
                 },

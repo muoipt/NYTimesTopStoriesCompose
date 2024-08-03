@@ -9,7 +9,7 @@ import muoipt.nytopstories.ui.base.VMState
 
 sealed class BookmarkListingAction: UIAction {
     data object LoadBookmark: BookmarkListingAction()
-    data class UpdateBookmarkArticle(val articleId: Int): BookmarkListingAction()
+    data class UpdateBookmarkArticle(val articleTitle: String): BookmarkListingAction()
 }
 
 sealed class BookmarkListingUIState(
@@ -41,9 +41,8 @@ data class BookmarkListingVMState(
 }
 
 data class ArticleUiData(
-    val id: Int = 0,
-    val section: String = "",
     val title: String = "",
+    val section: String = "",
     val url: String = "",
     val byline: String = "",
     val multimedia: List<MultimediaData>? = null,
@@ -56,9 +55,8 @@ data class ArticleVMData(
 ) {
     fun toUiData() = articles.map {
         ArticleUiData(
-            id = it.id,
-            section = it.section,
             title = it.title,
+            section = it.section,
             url = it.url,
             byline = it.byline,
             multimedia = it.multimedia,

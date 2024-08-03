@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 interface ArticleRepo {
     fun getArticles(strategy: DataStrategy = DataStrategy.AUTO): Flow<List<ArticleData>>
-    suspend fun updateBookmarkedArticle(articleId: Int)
+    suspend fun updateBookmarkedArticle(articleTitle: String)
     fun getBookmarkArticles(strategy: DataStrategy = DataStrategy.AUTO): Flow<List<ArticleData>?>
 }
 
@@ -45,11 +45,11 @@ class ArticleRepoImpl @Inject constructor(
             .flowOn(ioDispatcher)
     }
 
-    override suspend fun updateBookmarkedArticle(articleId: Int) {
+    override suspend fun updateBookmarkedArticle(articleTitle: String) {
         withContext(ioDispatcher) {
-            AppLog.listing("ArticleRepoImpl saveBookmarkedArticle articleId = $articleId")
+            AppLog.listing("ArticleRepoImpl saveBookmarkedArticle articleTitle = $articleTitle")
 
-            val article = articleLocalApi.getById(articleId).firstOrNull()
+            val article = articleLocalApi.getByTitle(articleTitle).firstOrNull()
                 ?: throw ArticleError(ArticleErrorCode.BookmarkArticleNotFound)
 
             AppLog.listing(

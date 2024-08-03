@@ -24,16 +24,16 @@ class ArticlesListingViewModel @Inject constructor(
     override fun handleAction(action: ArticlesListingAction) {
         when (action) {
             is ArticlesListingAction.LoadArticles -> {
-                loadArticles()
+                loadArticles(action.withRefresh)
             }
 
             is ArticlesListingAction.UpdateBookmarkArticle -> {
-                updateBookmarkArticle(action.articleId)
+                updateBookmarkArticle(action.articleTitle)
             }
         }
     }
 
-    private fun loadArticles() {
+    private fun loadArticles(withRefresh: Boolean) {
         viewModelScope.launch(CoroutineExceptionHandler { _, exception ->
             AppLog.listing("loadArticles exception = $exception")
 
@@ -57,7 +57,7 @@ class ArticlesListingViewModel @Inject constructor(
                 it.copy(isLoading = true)
             }
 
-            val articlesList = getArticlesListUseCase.getArticles().firstOrNull()
+            val articlesList = getArticlesListUseCase.getArticles(withRefresh).firstOrNull()
 
             if (articlesList.isNullOrEmpty()) {
                 vmStates.update {
@@ -80,7 +80,7 @@ class ArticlesListingViewModel @Inject constructor(
         }
     }
 
-    private fun updateBookmarkArticle(articleId: Int) {
+    private fun updateBookmarkArticle(articleTitle: String) {
         viewModelScope.launch(CoroutineExceptionHandler { _, exception ->
             AppLog.listing("updateBookmarkArticle exception = $exception")
 
@@ -99,8 +99,8 @@ class ArticlesListingViewModel @Inject constructor(
                 }
             }
         }) {
-            AppLog.listing("updateBookmarkArticle articleId = $articleId")
-            bookmarkArticleUseCase.updateBookmarkArticle(articleId)
+            AppLog.listing("updateBookmarkArticle articleTitle = $articleTitle")
+            bookmarkArticleUseCase.updateBookmarkArticle(articleTitle)
         }
     }
 }

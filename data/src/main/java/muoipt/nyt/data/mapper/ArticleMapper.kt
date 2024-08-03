@@ -40,7 +40,6 @@ fun Multimedia.toEntity() = MultimediaEntity(
 )
 
 fun ArticleEntity.toDataModel() = ArticleData(
-    id = id,
     section = section,
     subsection = subsection,
     title = title,

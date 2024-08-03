@@ -9,10 +9,7 @@ import com.squareup.moshi.JsonClass
     tableName = "article",
 )
 data class ArticleEntity(
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id")
-    val id: Int = 0,
-
+    @PrimaryKey
     @ColumnInfo(name = "title")
     val title: String = "",
 

@@ -9,7 +9,7 @@ interface ArticleDao: BaseDao<ArticleEntity> {
 
     fun getAllBookmark(): Flow<List<ArticleEntity>?>
 
-    fun getById(id: Int): Flow<ArticleEntity?>
+    fun getByTitle(title: String): Flow<ArticleEntity?>
 
     suspend fun deleteAll()
 }
@@ -22,8 +22,8 @@ abstract class ArticleDaoImpl: ArticleDao {
     @androidx.room.Query("SELECT * FROM article WHERE isBookmarked = 1")
     abstract override fun getAllBookmark(): Flow<List<ArticleEntity>?>
 
-    @androidx.room.Query("SELECT * FROM article WHERE id = :id")
-    abstract override fun getById(id: Int): Flow<ArticleEntity?>
+    @androidx.room.Query("SELECT * FROM article WHERE title = :title")
+    abstract override fun getByTitle(title: String): Flow<ArticleEntity?>
 
     @androidx.room.Query("DELETE FROM article")
     abstract override suspend fun deleteAll()
