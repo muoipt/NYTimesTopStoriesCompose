@@ -19,10 +19,9 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "NYTimesTopStories"
+rootProject.name = "NYTApp"
 include(":app")
 include(":network")
-include(":data")
 include(":model")
 include(":database")
-include(":common")
+include(":data")

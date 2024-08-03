@@ -1,11 +1,11 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
-    alias(libs.plugins.kotlin.ksp)
+    id("com.google.devtools.ksp")
 }
 
 android {
-    namespace = "muoipt.model"
+    namespace = "muoipt.nyt.model"
     compileSdk = 34
 
     defaultConfig {
@@ -41,4 +41,12 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    implementation(libs.moshi)
+    ksp(libs.moshi.codegen)
+    implementation(libs.moshi.codegen)
 }

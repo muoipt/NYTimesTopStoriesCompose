@@ -1,13 +1,12 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
-    alias(libs.plugins.hilt.android)
-    alias(libs.plugins.kotlin.ksp)
-    kotlin("kapt")
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
-    namespace = "muoipt.data"
+    namespace = "muoipt.nyt.data"
     compileSdk = 34
 
     defaultConfig {
@@ -35,10 +34,13 @@ android {
     }
 }
 
+kapt {
+    correctErrorTypes = true
+}
+
 dependencies {
 
     implementation(project(":model"))
-    implementation(project(":common"))
     implementation(project(":network"))
     implementation(project(":database"))
 
@@ -50,10 +52,5 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
-    ksp(libs.moshi.codegen)
-
-    implementation(libs.moshi.kotlin)
-
-
+    kapt(libs.hilt.android.compiler)
 }

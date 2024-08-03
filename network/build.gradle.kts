@@ -1,10 +1,11 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
-    alias(libs.plugins.hilt.android)
-    alias(libs.plugins.kotlin.ksp)
-    kotlin("kapt")
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
 }
+
 
 fun Project.getGradleProperty(property: String): String {
     val gradleProperties = extra
@@ -12,7 +13,7 @@ fun Project.getGradleProperty(property: String): String {
 }
 
 android {
-    namespace = "muoipt.core.network"
+    namespace = "muoipt.nyt.network"
     compileSdk = 34
 
     defaultConfig {
@@ -23,25 +24,26 @@ android {
     }
 
     buildTypes {
+        println(project.getGradleProperty("api_domain_dev"))
         debug {
+            isMinifyEnabled = false
             buildConfigField(
                 "String",
                 "BASE_URL",
                 project.getGradleProperty("api_domain_dev")
             )
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
         release {
+            isMinifyEnabled = true
             buildConfigField(
                 "String",
                 "BASE_URL",
                 project.getGradleProperty("api_domain_prod")
             )
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -62,7 +64,7 @@ android {
 
 dependencies {
 
-    implementation(project(":common"))
+    implementation(project(":model"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -72,16 +74,15 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    kapt(libs.hilt.android.compiler)
 
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.moshi)
-    implementation(libs.moshi.kotlin)
-    implementation(libs.moshi.core)
-    implementation(libs.moshi.codegen)
     implementation(libs.okhttp3.okhttp)
     implementation(libs.okhttp3.loggin.interceptor)
     implementation(libs.chucker)
-    ksp(libs.moshi.codegen)
 
+    implementation(libs.moshi)
+    ksp(libs.moshi.codegen)
+    implementation(libs.moshi.codegen)
 }
