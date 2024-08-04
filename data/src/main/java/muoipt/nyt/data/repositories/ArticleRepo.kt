@@ -24,6 +24,7 @@ interface ArticleRepo {
     fun getArticles(strategy: DataStrategy = DataStrategy.AUTO): Flow<List<ArticleData>>
     suspend fun updateBookmarkedArticle(articleTitle: String)
     fun getBookmarkArticles(strategy: DataStrategy = DataStrategy.AUTO): Flow<List<ArticleData>?>
+    fun getArticleDetail(title: String): Flow<ArticleData?>
 }
 
 class ArticleRepoImpl @Inject constructor(
@@ -84,5 +85,9 @@ class ArticleRepoImpl @Inject constructor(
         val articleEntities = remoteResponse.results.map { it.toEntity() }
 
         articleLocalApi.upsert(articleEntities)
+    }
+
+    override fun getArticleDetail(title: String): Flow<ArticleData?> {
+        return articleLocalApi.getByTitle(title).map { it?.toDataModel() }
     }
 }

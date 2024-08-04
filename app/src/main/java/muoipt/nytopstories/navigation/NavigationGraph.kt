@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import muoipt.nytopstories.ui.bookmark.BookmarkListingScreen
+import muoipt.nytopstories.ui.detail.ArticleDetailScreen
 import muoipt.nytopstories.ui.listing.ArticlesListingScreen
 
 @Composable
@@ -22,12 +23,19 @@ fun NavigationGraph(
     ) {
         composable(route = BottomNavItem.Listing.screenRoute) {
             navVisible.value = true
-            ArticlesListingScreen(modifier = modifier)
+            ArticlesListingScreen(modifier = modifier) {
+                navController.navigate(ScreenRoute.ArticleDetail.route)
+            }
         }
 
         composable(route = BottomNavItem.Bookmark.screenRoute) {
             navVisible.value = true
             BookmarkListingScreen(modifier = modifier)
+        }
+
+        composable(route = ScreenRoute.ArticleDetail.route) {
+            navVisible.value = false
+            ArticleDetailScreen(modifier = modifier, title = "Trump Backs Out of ABC Debate and Proposes One With Harris on Fox")
         }
     }
 }

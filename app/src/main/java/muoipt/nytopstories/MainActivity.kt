@@ -1,10 +1,8 @@
 package muoipt.nytopstories
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -35,7 +33,6 @@ import muoipt.nytopstories.ui.theme.NYTTheme
 class MainActivity: ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
         setContent {
             NYTTheme {
@@ -46,13 +43,15 @@ class MainActivity: ComponentActivity() {
 }
 
 @OptIn(ExperimentalAnimationApi::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun NYTApp(
     navController: NavHostController = rememberNavController()
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = backStackEntry?.destination?.route
+    val currentRoute =
+        if (backStackEntry?.destination?.route == BottomNavItem.Listing.screenRoute) stringResource(
+            id = R.string.app_name
+        ) else backStackEntry?.destination?.route
     val bottomNavVisibilityState = remember { (mutableStateOf(false)) }
 
     Scaffold(topBar = {

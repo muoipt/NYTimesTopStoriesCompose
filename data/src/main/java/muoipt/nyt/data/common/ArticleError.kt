@@ -6,7 +6,8 @@ enum class ArticleErrorCode {
     LoadBookmarkNotFound,
     LoadBookmarkException,
     BookmarkArticleNotFound,
-    BookmarkArticleException
+    BookmarkArticleException,
+    LoadArticleDetailNotFound
 }
 
 class ArticleError(

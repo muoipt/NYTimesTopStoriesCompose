@@ -104,6 +104,7 @@ dependencies {
     implementation(libs.android.compose.material3)
     implementation(libs.android.constraintlayout.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.android.browser)
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)

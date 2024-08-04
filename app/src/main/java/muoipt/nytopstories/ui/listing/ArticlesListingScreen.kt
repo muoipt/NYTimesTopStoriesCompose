@@ -26,9 +26,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -36,16 +36,17 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import muoipt.nyt.data.common.AppLog
 import muoipt.nyt.data.common.ArticleErrorCode
-import muoipt.nyt.model.MultimediaData
 import muoipt.nytopstories.R
 import muoipt.nytopstories.ui.base.BaseUi
 import muoipt.nytopstories.ui.base.UIState
 import muoipt.nytopstories.ui.components.CircleProgressBar
+import muoipt.nytopstories.ui.components.CustomTabOpener
 import muoipt.nytopstories.ui.components.OnLifecycleEvent
 
 @Composable
 fun ArticlesListingScreen(
-    modifier: Modifier, viewModel: ArticlesListingViewModel = hiltViewModel()
+    modifier: Modifier, viewModel: ArticlesListingViewModel = hiltViewModel(),
+    onDetailClicked: (title: String) -> Unit
 ) {
     val state by viewModel.uiStates.collectAsState()
     val uiState = state as? ArticlesListingUIState
@@ -69,7 +70,7 @@ fun ArticlesListingScreen(
     }
 
     BaseUi(content = {
-        SetupUi(modifier, articlesList) {
+        SetupUi(modifier, articlesList, onDetailClicked) {
             viewModel.sendAction(ArticlesListingAction.UpdateBookmarkArticle(it))
         }
     }, snackBarMessage = getErrorMessage(state))
@@ -110,6 +111,7 @@ private fun getErrorMessage(state: UIState): String? {
 private fun SetupUi(
     modifier: Modifier,
     articlesList: List<ArticleUiData>,
+    onDetailClicked: (title: String) -> Unit,
     onBookmarkUpdate: (articleTitle: String) -> Unit
 ) {
     val listState = rememberLazyListState()
@@ -130,13 +132,21 @@ private fun SetupUi(
         modifier = modifier.fillMaxWidth()
     ) {
         items(articlesList.size) { index ->
-            ArticleItemView(articlesList[index], onBookmarkUpdate)
+            ArticleItemView(articlesList[index], onBookmarkUpdate) {
+                onDetailClicked(it)
+            }
         }
     }
 }
 
 @Composable
-private fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (articleTitle: String) -> Unit) {
+private fun ArticleItemView(
+    articleUiData: ArticleUiData,
+    onBookmarkUpdate: (articleTitle: String) -> Unit,
+    onDetailClicked: (title: String) -> Unit
+) {
+
+    val context = LocalContext.current
 
     val bookmarkStatus = remember(articleUiData) {
         mutableStateOf(articleUiData.isBookmarked)
@@ -146,7 +156,12 @@ private fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (art
     val currentBookmarkStatus = bookmarkStatus.value
     AppLog.listing("currentBookmarkStatus = $currentBookmarkStatus")
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .clickable {
+//            onDetailClicked(articleUiData.title)
+            CustomTabOpener.openCustomTabFromUrl(context, articleUiData.url)
+        }) {
         articleUiData.multimedia?.firstOrNull()?.url.let { imageUrl ->
             AsyncImage(
                 model = imageUrl, contentDescription = null, modifier = Modifier.fillMaxWidth()
@@ -178,21 +193,5 @@ private fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (art
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-    }
-}
-
-@Preview
-@Composable
-private fun ArticleItemPreview() {
-    ArticleItemView(
-        articleUiData = ArticleUiData(
-            title = "title", updatedDate = "2024-08-02T17:30:13-04:00", multimedia = listOf(
-                MultimediaData(
-                    url = "https://static01.nyt.com/images/2024/08/02/multimedia/02pol-othering-harris-topart-zmcw/02pol-othering-harris-topart-zmcw-superJumbo.jpg"
-                )
-            )
-        )
-    ) {
-
     }
 }
