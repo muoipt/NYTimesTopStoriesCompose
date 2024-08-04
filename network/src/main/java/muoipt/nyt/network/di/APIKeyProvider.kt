@@ -2,6 +2,6 @@ package muoipt.nyt.network.di
 
 object APIKeyProvider {
     fun provideDevApiKey(): String {
-        return "hoMGAsvVH0bAmysYS2yKDzi3uEMfoP07"
+        return "JinupMDitNf1hW8ni9J86F1DtM47qAXk"
     }
 }

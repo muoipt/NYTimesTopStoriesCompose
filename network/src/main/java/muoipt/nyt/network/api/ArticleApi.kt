@@ -18,6 +18,7 @@ class ArticleApi @Inject constructor(
 }
 
 
+// API from: https://developer.nytimes.com/docs/top-stories-product/1/overview
 interface ArticleApiService {
 
     @GET("/svc/topstories/v2")
