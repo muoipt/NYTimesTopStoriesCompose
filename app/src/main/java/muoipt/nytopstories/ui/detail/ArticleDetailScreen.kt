@@ -15,6 +15,7 @@ import muoipt.nyt.data.common.AppLog
 import muoipt.nytopstories.ui.base.BaseUi
 import muoipt.nytopstories.ui.components.CircleProgressBar
 import muoipt.nytopstories.ui.components.CustomTabOpener
+import muoipt.nytopstories.ui.listing.ArticleUiData
 
 @Composable
 fun ArticleDetailScreen(

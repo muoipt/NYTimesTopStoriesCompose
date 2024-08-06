@@ -2,10 +2,10 @@ package muoipt.nytopstories.ui.detail
 
 import muoipt.nyt.data.common.ArticleError
 import muoipt.nyt.model.ArticleData
-import muoipt.nyt.model.MultimediaData
 import muoipt.nytopstories.ui.base.UIAction
 import muoipt.nytopstories.ui.base.UIState
 import muoipt.nytopstories.ui.base.VMState
+import muoipt.nytopstories.ui.listing.ArticleUiData
 
 sealed class ArticleDetailAction: UIAction {
     data class LoadArticleDetail(val articleTitle: String): ArticleDetailAction()
@@ -38,16 +38,6 @@ data class ArticleDetailVMState(
         }
     }
 }
-
-data class ArticleUiData(
-    val title: String = "",
-    val section: String = "",
-    val url: String = "",
-    val byline: String = "",
-    val multimedia: List<MultimediaData>? = null,
-    val updatedDate: String = "",
-    val isBookmarked: Boolean = false
-)
 
 data class ArticleVMData(
     val articleDetail: ArticleData = ArticleData()
