@@ -13,7 +13,7 @@ This is a simple news reader app that show top stories feed from NewYorkTimes. I
 - Open article detail in browser
 
 ## Tech stack
-- MVI architecture
+- MVI + MVVM architecture
 - Jetpack compose for UI
 - Retrofit + OkHttp + Moshi for network
 - RoomDB for local storage
