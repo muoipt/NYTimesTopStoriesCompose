@@ -84,7 +84,16 @@ class ArticleRepoImpl @Inject constructor(
         val remoteResponse = articleRemoteApi.getArticles()
         val articleEntities = remoteResponse.results.map { it.toEntity() }
 
-        articleLocalApi.upsert(articleEntities)
+        val bookmarkedArticle = articleLocalApi.getAllBookmark().firstOrNull()
+        AppLog.listing("fetchArticles articleLocalApi.getAllBookmark() = $bookmarkedArticle")
+
+        val mergedArticles = articleEntities.map { article ->
+            val isBookmarkedArticle = bookmarkedArticle?.any { it.title == article.title }
+            AppLog.listing("isBookmarkedArticle = $isBookmarkedArticle for title = ${article.title}")
+            article.copy(isBookmarked = if (isBookmarkedArticle == true) 1 else 0)
+        }
+
+        articleLocalApi.upsert(mergedArticles)
     }
 
     override fun getArticleDetail(title: String): Flow<ArticleData?> {

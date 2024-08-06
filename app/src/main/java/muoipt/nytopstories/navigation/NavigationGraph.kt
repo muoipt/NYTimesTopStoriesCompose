@@ -24,8 +24,11 @@ fun NavigationGraph(
         composable(route = BottomNavItem.Listing.screenRoute) {
             navVisible.value = true
             ArticlesListingScreen(modifier = modifier) {
-                navController.navigate(ScreenRoute.ArticleDetail.route)
+//                navController.navigate(ScreenRoute.ArticleDetail.route)
             }
+//            ArticlesListingMVVMScreen(modifier = modifier) {
+//                navController.navigate(ScreenRoute.ArticleDetail.route)
+//            }
         }
 
         composable(route = BottomNavItem.Bookmark.screenRoute) {
@@ -35,7 +38,10 @@ fun NavigationGraph(
 
         composable(route = ScreenRoute.ArticleDetail.route) {
             navVisible.value = false
-            ArticleDetailScreen(modifier = modifier, title = "Trump Backs Out of ABC Debate and Proposes One With Harris on Fox")
+            ArticleDetailScreen(
+                modifier = modifier,
+                title = "Trump Backs Out of ABC Debate and Proposes One With Harris on Fox"
+            )
         }
     }
 }

@@ -2,9 +2,11 @@ package muoipt.nytopstories.ui.listing
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,7 +19,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,84 +28,65 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import muoipt.nyt.data.common.AppLog
-import muoipt.nyt.data.common.ArticleErrorCode
-import muoipt.nytopstories.R
-import muoipt.nytopstories.ui.base.BaseUi
-import muoipt.nytopstories.ui.base.UIState
 import muoipt.nytopstories.ui.components.CircleProgressBar
 import muoipt.nytopstories.ui.components.CustomTabOpener
-import muoipt.nytopstories.ui.components.OnLifecycleEvent
 
 @Composable
 fun ArticlesListingScreen(
-    modifier: Modifier, viewModel: ArticlesListingViewModel = hiltViewModel(),
+    modifier: Modifier,
+    viewModel: ArticlesListingViewModel = hiltViewModel(),
     onDetailClicked: (title: String) -> Unit
 ) {
-    val state by viewModel.uiStates.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val uiState = state as? ArticlesListingUIState
 
-    val articlesList by remember(uiState?.articlesList) {
-        derivedStateOf { uiState?.articlesList ?: listOf() }
+    val isLoading by remember(uiState?.isLoading) {
+        derivedStateOf { uiState?.isLoading }
     }
 
-    when (state) {
-        is ArticlesListingUIState.Default -> {
-            LaunchedEffect(Unit) {
-                viewModel.sendAction(ArticlesListingAction.LoadArticles(true))
-            }
-        }
-
-        is ArticlesListingUIState.Loading -> {
-            CircleProgressBar()
-        }
-
-        else -> {}
+    val error by remember(uiState?.error) {
+        derivedStateOf { uiState?.error }
     }
 
-    BaseUi(content = {
-        SetupUi(modifier, articlesList, onDetailClicked) {
-            viewModel.sendAction(ArticlesListingAction.UpdateBookmarkArticle(it))
+    val articlesList by remember(uiState?.articles) {
+        derivedStateOf { uiState?.articles ?: listOf() }
+    }
+
+    if (isLoading == true) {
+        CircleProgressBar()
+    } else {
+        if (error != null) {
+            ErrorUI(modifier, error?.errorMessage)
         }
-    }, snackBarMessage = getErrorMessage(state))
 
-    OnLifecycleEvent(LocalLifecycleOwner.current) { _, event ->
-        when (event) {
-            Lifecycle.Event.ON_RESUME -> {
-                viewModel.sendAction(ArticlesListingAction.LoadArticles(false))
+        if (articlesList.isEmpty()) {
+            EmptyUi(modifier)
+        } else {
+            SetupUi(modifier, articlesList, onDetailClicked) {
+                viewModel.handleAction(ArticlesListingAction.UpdateBookmarkArticle(it))
             }
-
-            else -> {}
         }
     }
 }
 
 @Composable
-private fun getErrorMessage(state: UIState): String? {
-    val loadArticlesNotFoundErrorMsg = stringResource(id = R.string.error_no_articles)
-
-    val errorMessage by remember(state) {
-        derivedStateOf {
-            if (state is ArticlesListingUIState.Error) {
-                when (state.error.errorCode) {
-                    ArticleErrorCode.LoadArticlesNotFound -> loadArticlesNotFoundErrorMsg
-                    else -> {
-                        state.error.errorMessage
-                    }
-                }
-
-            } else null
-        }
+private fun ErrorUI(modifier: Modifier, error: String?) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = error ?: "An error occurred!")
     }
+}
 
-    return errorMessage
+@Composable
+private fun EmptyUi(modifier: Modifier) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = "No article available")
+    }
 }
 
 @Composable
@@ -121,15 +103,13 @@ private fun SetupUi(
         AppLog.listing("listState.firstVisibleItemIndex = ${listState.firstVisibleItemIndex}")
         coroutineScope.launch {
             listState.animateScrollToItem(
-                listState.firstVisibleItemIndex,
-                listState.firstVisibleItemScrollOffset
+                listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset
             )
         }
     }
 
     LazyColumn(
-        state = listState,
-        modifier = modifier.fillMaxWidth()
+        state = listState, modifier = modifier.fillMaxWidth()
     ) {
         items(articlesList.size) { index ->
             ArticleItemView(articlesList[index], onBookmarkUpdate) {

@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,57 +35,55 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import muoipt.nyt.data.common.AppLog
 import muoipt.nyt.model.MultimediaData
 import muoipt.nytopstories.R
-import muoipt.nytopstories.ui.base.BaseUi
 import muoipt.nytopstories.ui.components.CircleProgressBar
+import muoipt.nytopstories.ui.listing.ArticleUiData
 
 @Composable
 fun BookmarkListingScreen(
     modifier: Modifier, viewModel: BookmarkListingViewModel = hiltViewModel()
 ) {
-    val state by viewModel.uiStates.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val uiState = state as? BookmarkListingUIState
 
-    val articlesList by remember(uiState?.articlesList) {
-        derivedStateOf { uiState?.articlesList ?: listOf() }
+    val isLoading by remember(uiState?.isLoading) {
+        derivedStateOf { uiState?.isLoading }
     }
 
-    when (state) {
-        is BookmarkListingUIState.Default -> {
-            LaunchedEffect(Unit) {
-                viewModel.sendAction(BookmarkListingAction.LoadBookmark)
+    val error by remember(uiState?.error) {
+        derivedStateOf { uiState?.error }
+    }
+
+    val bookmarkedArticles by remember(uiState?.vmData?.articles) {
+        derivedStateOf { uiState?.vmData?.articles ?: listOf() }
+    }
+
+    if (isLoading == true) {
+        CircleProgressBar()
+    } else {
+        if (error != null) {
+            ErrorUI(modifier, error?.errorMessage)
+        }
+
+        if (bookmarkedArticles.isEmpty()) {
+            EmptyBookmarkUi(modifier)
+        } else {
+            SetupUi(modifier, bookmarkedArticles) {
+                viewModel.handleAction(BookmarkListingAction.UpdateBookmarkArticle(it))
             }
         }
+    }
+}
 
-        is BookmarkListingUIState.Loading -> {
-            CircleProgressBar()
-        }
-
-        is BookmarkListingUIState.Empty -> {
-            EmptyBookmarkUi(modifier)
-        }
-
-        is BookmarkListingUIState.LoadBookmarkSuccess -> {
-            BaseUi(content = {
-                SetupUi(modifier, articlesList) {
-                    viewModel.sendAction(BookmarkListingAction.UpdateBookmarkArticle(it))
-                }
-            }, snackBarMessage = null)
-        }
-
-        is BookmarkListingUIState.Error -> {
-            BaseUi(content = {
-                SetupUi(modifier, articlesList) {
-                    viewModel.sendAction(BookmarkListingAction.UpdateBookmarkArticle(it))
-                }
-            }, snackBarMessage = getErrorMessage(state as BookmarkListingUIState.Error))
-        }
-
-        else -> {}
+@Composable
+private fun ErrorUI(modifier: Modifier, error: String?) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = error ?: "An error occurred!")
     }
 }
 
@@ -100,17 +97,6 @@ private fun EmptyBookmarkUi(modifier: Modifier) {
             style = TextStyle(fontSize = 24.sp)
         )
     }
-}
-
-@Composable
-private fun getErrorMessage(state: BookmarkListingUIState.Error): String? {
-    val errorMessage by remember(state) {
-        derivedStateOf {
-            state.error.errorMessage
-        }
-    }
-
-    return errorMessage
 }
 
 @Composable
@@ -143,7 +129,10 @@ private fun SetupUi(
 }
 
 @Composable
-private fun ArticleItemView(articleUiData: ArticleUiData, onBookmarkUpdate: (articleTitle: String) -> Unit) {
+private fun ArticleItemView(
+    articleUiData: ArticleUiData,
+    onBookmarkUpdate: (articleTitle: String) -> Unit
+) {
 
     val bookmarkStatus = remember(articleUiData) {
         mutableStateOf(articleUiData.isBookmarked)

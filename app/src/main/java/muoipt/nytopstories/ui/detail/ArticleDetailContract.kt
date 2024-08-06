@@ -1,64 +1,34 @@
 package muoipt.nytopstories.ui.detail
 
 import muoipt.nyt.data.common.ArticleError
-import muoipt.nyt.model.ArticleData
-import muoipt.nyt.model.MultimediaData
-import muoipt.nytopstories.ui.base.UIAction
-import muoipt.nytopstories.ui.base.UIState
-import muoipt.nytopstories.ui.base.VMState
+import muoipt.nytopstories.ui.base.Action
+import muoipt.nytopstories.ui.listing.ArticleUiData
 
-sealed class ArticleDetailAction: UIAction {
+sealed class ArticleDetailAction: Action {
     data class LoadArticleDetail(val articleTitle: String): ArticleDetailAction()
     data class UpdateBookmark(val articleTitle: String): ArticleDetailAction()
 }
 
-sealed class ArticleDetailUIState(
-    open val articleDetailData: ArticleUiData = ArticleUiData()
-): UIState {
-    data object Default: ArticleDetailUIState()
-    data object Loading: ArticleDetailUIState()
-    class LoadArticleSuccess(override val articleDetailData: ArticleUiData):
-        ArticleDetailUIState(articleDetailData)
+sealed class ArticleDetailVMState {
+    data object Loading: ArticleDetailVMState()
+    data class LoadSuccess(val article: ArticleUiData): ArticleDetailVMState()
+    data object BookmarkUpdated: ArticleDetailVMState()
+    data class Error(val error: ArticleError): ArticleDetailVMState()
 
-    class Error(val error: ArticleError): ArticleDetailUIState()
-}
-
-data class ArticleDetailVMState(
-    val vmData: ArticleVMData = ArticleVMData(),
-    val isLoading: Boolean = false,
-    val error: ArticleError? = null
-): VMState() {
-    override fun toUIState(): ArticleDetailUIState {
-        val uiData = vmData.toUiData()
-        return when {
-            isLoading -> ArticleDetailUIState.Loading
-            error != null -> ArticleDetailUIState.Error(error)
-            vmData.articleDetail.title.isNotEmpty() -> ArticleDetailUIState.LoadArticleSuccess(uiData)
-            else -> ArticleDetailUIState.Default
+    fun toUIState(currentState: ArticleDetailUIState): ArticleDetailUIState{
+        return when(this) {
+            is Loading -> currentState.copy(isLoading = true)
+            is Error -> currentState.copy(error = error)
+            is BookmarkUpdated -> currentState.copy(bookmarkUpdated = true)
+            is LoadSuccess -> currentState.copy(articleDetail = article)
+            else -> currentState
         }
     }
 }
 
-data class ArticleUiData(
-    val title: String = "",
-    val section: String = "",
-    val url: String = "",
-    val byline: String = "",
-    val multimedia: List<MultimediaData>? = null,
-    val updatedDate: String = "",
-    val isBookmarked: Boolean = false
+data class ArticleDetailUIState(
+    val isLoading: Boolean = false,
+    val error: ArticleError? = null,
+    val bookmarkUpdated: Boolean = false,
+    val articleDetail: ArticleUiData = ArticleUiData()
 )
-
-data class ArticleVMData(
-    val articleDetail: ArticleData = ArticleData()
-) {
-    fun toUiData() = ArticleUiData(
-        title = articleDetail.title,
-        section = articleDetail.section,
-        url = articleDetail.url,
-        byline = articleDetail.byline,
-        multimedia = articleDetail.multimedia,
-        updatedDate = articleDetail.updatedDate,
-        isBookmarked = articleDetail.isBookmarked
-    )
-}

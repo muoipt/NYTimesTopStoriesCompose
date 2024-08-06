@@ -2,105 +2,94 @@ package muoipt.nytopstories.ui.listing
 
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.stateIn
 import muoipt.nyt.data.common.AppLog
 import muoipt.nyt.data.common.ArticleError
 import muoipt.nyt.data.common.ArticleErrorCode
 import muoipt.nyt.data.usecases.BookmarkArticleUseCase
 import muoipt.nyt.data.usecases.GetArticlesListUseCase
-import muoipt.nytopstories.ui.base.BaseViewModel
+import muoipt.nytopstories.ui.base.BaseMVIViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class ArticlesListingViewModel @Inject constructor(
     private val getArticlesListUseCase: GetArticlesListUseCase,
     private val bookmarkArticleUseCase: BookmarkArticleUseCase
-): BaseViewModel<ArticlesListingAction, ArticlesListingUIState, ArticlesListingVMState>(
-    initUIState = ArticlesListingUIState.Default, initVMState = ArticlesListingVMState()
+): BaseMVIViewModel<ArticlesListingAction, ArticlesListingVMState, ArticlesListingUIState>(
+    initialUIState = ArticlesListingUIState()
 ) {
-    override fun handleAction(action: ArticlesListingAction) {
-        when (action) {
-            is ArticlesListingAction.LoadArticles -> {
-                loadArticles(action.withRefresh)
-            }
-
-            is ArticlesListingAction.UpdateBookmarkArticle -> {
-                updateBookmarkArticle(action.articleTitle)
-            }
-        }
+    override fun initUIState(): StateFlow<ArticlesListingUIState> {
+        return merge(
+            loadArticles(true), actionFlow.toVMState().filterNotNull()
+        ).scan(initialUIState) { currentState, partialState ->
+            partialState.toUIState(currentState)
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, initialUIState)
     }
 
-    private fun loadArticles(withRefresh: Boolean) {
-        viewModelScope.launch(CoroutineExceptionHandler { _, exception ->
-            AppLog.listing("loadArticles exception = $exception")
-
-            if (exception is ArticleError) {
-                vmStates.update {
-                    it.copy(
-                        isLoading = false, error = exception
-                    )
-                }
-            } else {
-                vmStates.update {
-                    it.copy(
-                        isLoading = false,
-                        error = ArticleError(ArticleErrorCode.LoadArticlesException)
-                    )
-                }
-            }
-        }) {
-
-            vmStates.update {
-                it.copy(isLoading = true)
-            }
-
-            val articlesList = getArticlesListUseCase.getArticles(withRefresh).firstOrNull()
-
-            if (articlesList.isNullOrEmpty()) {
-                vmStates.update {
-                    it.copy(
-                        isLoading = false,
-                        error = ArticleError(errorCode = ArticleErrorCode.LoadArticlesNotFound)
-                    )
-                }
-            } else {
-                val articleVMData = ArticleVMData(
-                    articles = articlesList
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun Flow<ArticlesListingAction>.toVMState(): Flow<ArticlesListingVMState?> {
+        return flatMapLatest { action ->
+            when (action) {
+                is ArticlesListingAction.LoadArticles -> loadArticles(
+                    action.withRefresh
                 )
 
-                AppLog.listing("loadArticles articles[0] = ${articlesList[0].toDisplayString()}")
-
-                vmStates.update {
-                    it.copy(isLoading = false, vmData = articleVMData)
+                is ArticlesListingAction.UpdateBookmarkArticle -> {
+                    updateBookmarkArticle(action.articleTitle)
                 }
             }
         }
     }
 
-    private fun updateBookmarkArticle(articleTitle: String) {
-        viewModelScope.launch(CoroutineExceptionHandler { _, exception ->
-            AppLog.listing("updateBookmarkArticle exception = $exception")
-
-            if (exception is ArticleError) {
-                vmStates.update {
-                    it.copy(
-                        isLoading = false, error = exception
+    private fun loadArticles(withRefresh: Boolean): Flow<ArticlesListingVMState> {
+        return flow {
+            getArticlesListUseCase.getArticles(withRefresh).onStart {
+                emit(ArticlesListingVMState.Loading)
+            }.catch { exception ->
+                emit(
+                    ArticlesListingVMState.Error(
+                        ArticleError(
+                            ArticleErrorCode.LoadArticlesException, exception.message
+                        )
                     )
-                }
-            } else {
-                vmStates.update {
-                    it.copy(
-                        isLoading = false,
-                        error = ArticleError(ArticleErrorCode.BookmarkArticleException)
-                    )
-                }
+                )
+            }.collect { articles ->
+                AppLog.listing("loadArticles collect articles")
+                AppLog.listing(
+                    "loadArticles collect articles.first = ${
+                        articles.first().toDisplayString()
+                    }"
+                )
+                emit(ArticlesListingVMState.LoadArticlesSuccess(articles))
             }
-        }) {
-            AppLog.listing("updateBookmarkArticle articleTitle = $articleTitle")
-            bookmarkArticleUseCase.updateBookmarkArticle(articleTitle)
+        }
+    }
+
+    private fun updateBookmarkArticle(articleTitle: String): Flow<ArticlesListingVMState> {
+        return flow {
+            try {
+                bookmarkArticleUseCase.updateBookmarkArticle(articleTitle)
+                emit(ArticlesListingVMState.BookmarkUpdated)
+            } catch (exception: Exception) {
+                emit(
+                    ArticlesListingVMState.Error(
+                        ArticleError(
+                            ArticleErrorCode.BookmarkArticleException, exception.message
+                        )
+                    )
+                )
+            }
         }
     }
 }
