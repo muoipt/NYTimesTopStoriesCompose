@@ -4,7 +4,8 @@ A MVI architecture with Jetpack Compose template
 This is a simple news reader app that show top stories feed from NewYorkTimes. It is written in Kotlin and Jetpack Compose.
 
 ## UI
-[Screen_recording_20240804_095702.webm](https://github.com/user-attachments/assets/d7244bb3-0de4-4b49-930c-1b1cbe799f35)
+[Screen_recording_20240806_134946.webm](https://github.com/user-attachments/assets/49b19ee5-3cec-45c1-b7b3-31bac0a209f2)
+
 
 ## Features
 - Fetch top stories articles from [https://developer.nytimes.com/apis]
