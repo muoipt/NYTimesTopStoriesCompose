@@ -8,7 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import muoipt.nytopstories.ui.bookmark.BookmarkListingScreen
 import muoipt.nytopstories.ui.detail.ArticleDetailScreen
-import muoipt.nytopstories.ui.listing.ArticlesListingScreen
+import muoipt.nytopstories.ui.mvvm.ArticlesListingMVVMScreen
 
 @Composable
 fun NavigationGraph(
@@ -23,12 +23,12 @@ fun NavigationGraph(
     ) {
         composable(route = BottomNavItem.Listing.screenRoute) {
             navVisible.value = true
-            ArticlesListingScreen(modifier = modifier) {
-//                navController.navigate(ScreenRoute.ArticleDetail.route)
-            }
-//            ArticlesListingMVVMScreen(modifier = modifier) {
+//            ArticlesListingScreen(modifier = modifier) {
 //                navController.navigate(ScreenRoute.ArticleDetail.route)
 //            }
+            ArticlesListingMVVMScreen(modifier = modifier) {
+                navController.navigate(ScreenRoute.ArticleDetail.route)
+            }
         }
 
         composable(route = BottomNavItem.Bookmark.screenRoute) {
