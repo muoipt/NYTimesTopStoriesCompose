@@ -31,8 +31,8 @@ class ArticlesListingViewModel @Inject constructor(
     public override fun initUIState(): StateFlow<ArticlesListingUIState> {
         return merge(
             loadArticles(true), actionFlow.toVMState().filterNotNull()
-        ).scan(initialUIState) { currentState, partialState ->
-            partialState.toUIState(currentState)
+        ).scan(initialUIState) { currentState, vmStateState ->
+            vmStateState.toUIState(currentState)
         }.stateIn(viewModelScope, SharingStarted.Eagerly, initialUIState)
     }
 
