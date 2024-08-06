@@ -1,18 +1,19 @@
 package muoipt.nytopstories.ui.detail
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import muoipt.nyt.data.common.AppLog
-import muoipt.nytopstories.ui.base.BaseUi
 import muoipt.nytopstories.ui.components.CircleProgressBar
 import muoipt.nytopstories.ui.components.CustomTabOpener
 import muoipt.nytopstories.ui.listing.ArticleUiData
@@ -22,53 +23,50 @@ fun ArticleDetailScreen(
     modifier: Modifier, viewModel: ArticleDetailViewModel = hiltViewModel(),
     title: String
 ) {
-    val state by viewModel.uiStates.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val uiState = state as? ArticleDetailUIState
 
-    val article by remember(uiState?.articleDetailData) {
-        derivedStateOf { uiState?.articleDetailData ?: ArticleUiData() }
+    val isLoading by remember(uiState?.isLoading) {
+        derivedStateOf { uiState?.isLoading }
     }
 
-    when (state) {
-        is ArticleDetailUIState.Default -> {
-            LaunchedEffect(Unit) {
-                viewModel.sendAction(ArticleDetailAction.LoadArticleDetail(title))
+    val error by remember(uiState?.error) {
+        derivedStateOf { uiState?.error }
+    }
+
+    val articleDetail by remember(uiState?.articleDetail) {
+        derivedStateOf { uiState?.articleDetail }
+    }
+
+    if (isLoading == true) {
+        CircleProgressBar()
+    } else {
+        if (error != null) {
+            ErrorUI(modifier, error?.errorMessage)
+        }
+
+        if (articleDetail == null) {
+            EmptyUi(modifier)
+        } else {
+            SetupUi(modifier, articleDetail!!) {
+                viewModel.handleAction(ArticleDetailAction.UpdateBookmark(it))
             }
         }
-
-        is ArticleDetailUIState.Loading -> {
-            CircleProgressBar()
-        }
-
-        is ArticleDetailUIState.LoadArticleSuccess -> {
-            BaseUi(content = {
-                SetupUi(modifier, article) {
-                    viewModel.sendAction(ArticleDetailAction.UpdateBookmark(it))
-                }
-            }, snackBarMessage = null)
-        }
-
-        is ArticleDetailUIState.Error -> {
-            BaseUi(content = {
-                SetupUi(modifier, article) {
-                    viewModel.sendAction(ArticleDetailAction.UpdateBookmark(it))
-                }
-            }, snackBarMessage = getErrorMessage(state as ArticleDetailUIState.Error))
-        }
-
-        else -> {}
     }
 }
 
 @Composable
-private fun getErrorMessage(state: ArticleDetailUIState.Error): String? {
-    val errorMessage by remember(state) {
-        derivedStateOf {
-            state.error.errorMessage
-        }
+private fun ErrorUI(modifier: Modifier, error: String?) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = error ?: "An error occurred!")
     }
+}
 
-    return errorMessage
+@Composable
+private fun EmptyUi(modifier: Modifier) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(text = "No article available")
+    }
 }
 
 @Composable

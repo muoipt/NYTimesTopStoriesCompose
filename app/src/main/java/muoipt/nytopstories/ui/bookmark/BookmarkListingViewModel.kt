@@ -2,107 +2,94 @@ package muoipt.nytopstories.ui.bookmark
 
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.flow.stateIn
 import muoipt.nyt.data.common.AppLog
 import muoipt.nyt.data.common.ArticleError
 import muoipt.nyt.data.common.ArticleErrorCode
 import muoipt.nyt.data.usecases.BookmarkArticleUseCase
 import muoipt.nyt.data.usecases.GetBookmarkListUseCase
-import muoipt.nytopstories.ui.base.BaseViewModel
+import muoipt.nytopstories.ui.base.BaseMVIViewModel
+import muoipt.nytopstories.ui.listing.toArticleUiData
 import javax.inject.Inject
 
 @HiltViewModel
 class BookmarkListingViewModel @Inject constructor(
     private val getBookmarkListUseCase: GetBookmarkListUseCase,
     private val bookmarkArticleUseCase: BookmarkArticleUseCase
-): BaseViewModel<BookmarkListingAction, BookmarkListingUIState, BookmarkListingVMState>(
-    initUIState = BookmarkListingUIState.Default, initVMState = BookmarkListingVMState()
+): BaseMVIViewModel<BookmarkListingAction, BookmarkListingVMState, BookmarkListingUIState>(
+    initialUIState = BookmarkListingUIState()
 ) {
-    override fun handleAction(action: BookmarkListingAction) {
-        when (action) {
-            is BookmarkListingAction.LoadBookmark -> {
-                loadBookmarkedArticles()
-            }
 
-            is BookmarkListingAction.UpdateBookmarkArticle -> {
-                updateBookmarkArticle(action.articleTitle)
+    override fun initUIState(): StateFlow<BookmarkListingUIState> {
+        return merge(
+            loadBookmarks(), actionFlow.toVMState().filterNotNull()
+        ).scan(initialUIState) { currentState, partialState ->
+            partialState.toUIState(currentState)
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, initialUIState)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun Flow<BookmarkListingAction>.toVMState(): Flow<BookmarkListingVMState?> {
+        return flatMapLatest { action ->
+            when (action) {
+                is BookmarkListingAction.LoadBookmark -> loadBookmarks()
+
+                is BookmarkListingAction.UpdateBookmarkArticle -> {
+                    updateBookmarkArticle(action.articleTitle)
+                }
             }
         }
     }
 
-    private fun loadBookmarkedArticles() {
-        viewModelScope.launch {
-            getBookmarkListUseCase.getBookmark()
-                .onStart {
-                    vmStates.update {
-                        it.copy(isLoading = true)
-                    }
-                }
-                .catch { exception ->
-                    AppLog.listing("loadBookmarkedArticles exception = $exception")
-
-                    if (exception is ArticleError) {
-                        vmStates.update {
-                            it.copy(
-                                isLoading = false, error = exception
-                            )
-                        }
-                    } else {
-                        vmStates.update {
-                            it.copy(
-                                isLoading = false,
-                                error = ArticleError(ArticleErrorCode.LoadBookmarkException)
-                            )
-                        }
-                    }
-                }
-                .collect { articlesList ->
-                    if (articlesList.isNullOrEmpty()) {
-                        vmStates.update {
-                            it.copy(
-                                isLoading = false,
-                                isEmpty = true
-                            )
-                        }
-                    } else {
-                        val articleVMData = ArticleVMData(
-                            articles = articlesList
+    private fun loadBookmarks(): Flow<BookmarkListingVMState> {
+        return flow {
+            getBookmarkListUseCase.getBookmark().onStart {
+                emit(BookmarkListingVMState.Loading)
+            }.catch { exception ->
+                emit(
+                    BookmarkListingVMState.Error(
+                        ArticleError(
+                            ArticleErrorCode.LoadArticlesException, exception.message
                         )
+                    )
+                )
+            }.collect { bookmarks ->
+                AppLog.listing("loadBookmarks collect bookmarks")
 
-                        AppLog.listing("loadBookmarkedArticles articles[0] = ${articlesList[0].toDisplayString()}")
-
-                        vmStates.update {
-                            it.copy(isLoading = false, vmData = articleVMData)
-                        }
-                    }
+                if (bookmarks == null) {
+                    emit(BookmarkListingVMState.Empty)
+                } else {
+                    emit(BookmarkListingVMState.LoadBookmarkSuccess(bookmarks.map { it.toArticleUiData() }))
                 }
+            }
         }
     }
 
-    private fun updateBookmarkArticle(articleTitle: String) {
-        viewModelScope.launch(CoroutineExceptionHandler { _, exception ->
-            AppLog.listing("updateBookmarkArticle exception = $exception")
-
-            if (exception is ArticleError) {
-                vmStates.update {
-                    it.copy(
-                        error = exception
+    private fun updateBookmarkArticle(articleTitle: String): Flow<BookmarkListingVMState> {
+        return flow {
+            try {
+                bookmarkArticleUseCase.updateBookmarkArticle(articleTitle)
+                emit(BookmarkListingVMState.BookmarkUpdated)
+            } catch (exception: Exception) {
+                emit(
+                    BookmarkListingVMState.Error(
+                        ArticleError(
+                            ArticleErrorCode.BookmarkArticleException, exception.message
+                        )
                     )
-                }
-            } else {
-                vmStates.update {
-                    it.copy(
-                        error = ArticleError(ArticleErrorCode.BookmarkArticleException)
-                    )
-                }
+                )
             }
-        }) {
-            AppLog.listing("updateBookmarkArticle articleTitle = $articleTitle")
-            bookmarkArticleUseCase.updateBookmarkArticle(articleTitle)
         }
     }
 }

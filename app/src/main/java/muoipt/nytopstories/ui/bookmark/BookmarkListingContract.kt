@@ -1,10 +1,8 @@
 package muoipt.nytopstories.ui.bookmark
 
 import muoipt.nyt.data.common.ArticleError
-import muoipt.nyt.model.ArticleData
+import muoipt.nytopstories.ui.base.State
 import muoipt.nytopstories.ui.base.UIAction
-import muoipt.nytopstories.ui.base.UIState
-import muoipt.nytopstories.ui.base.VMState
 import muoipt.nytopstories.ui.listing.ArticleUiData
 
 sealed class BookmarkListingAction: UIAction {
@@ -12,36 +10,39 @@ sealed class BookmarkListingAction: UIAction {
     data class UpdateBookmarkArticle(val articleTitle: String): BookmarkListingAction()
 }
 
-sealed class BookmarkListingUIState(
-    open val articlesList: List<ArticleUiData> = listOf()
-): UIState {
-    data object Default: BookmarkListingUIState()
-    data object Loading: BookmarkListingUIState()
-    data object Empty: BookmarkListingUIState()
-    class LoadBookmarkSuccess(override val articlesList: List<ArticleUiData>): BookmarkListingUIState(articlesList)
-    class Error(val error: ArticleError): BookmarkListingUIState()
-}
+sealed class BookmarkListingVMState {
+    data object Loading: BookmarkListingVMState()
+    data object Empty: BookmarkListingVMState()
+    class LoadBookmarkSuccess(val articlesList: List<ArticleUiData>): BookmarkListingVMState()
+    data object BookmarkUpdated: BookmarkListingVMState()
+    class Error(val error: ArticleError): BookmarkListingVMState()
 
-data class BookmarkListingVMState(
-    val vmData: ArticleVMData = ArticleVMData(),
-    val isEmpty: Boolean = false,
-    val isLoading: Boolean = false,
-    val error: ArticleError? = null
-): VMState() {
-    override fun toUIState(): BookmarkListingUIState {
-        val uiData = vmData.toUiData()
-        return when {
-            isLoading -> BookmarkListingUIState.Loading
-            isEmpty -> BookmarkListingUIState.Empty
-            error != null -> BookmarkListingUIState.Error(error)
-            vmData.articles.isNotEmpty() -> BookmarkListingUIState.LoadBookmarkSuccess(uiData)
-            else -> BookmarkListingUIState.Default
+    fun toUIState(currentState: BookmarkListingUIState): BookmarkListingUIState {
+        return when (this) {
+            is Loading -> currentState.copy(isLoading = true)
+            is Error -> currentState.copy(isLoading = false, error = error)
+            is Empty -> currentState.copy(isLoading = false, isEmpty = true)
+            is BookmarkUpdated -> currentState.copy(isLoading = false, bookmarkUpdated = true)
+            is LoadBookmarkSuccess -> currentState.copy(
+                isLoading = false,
+                isEmpty = false,
+                error = null,
+                vmData = ArticleUIData(articlesList)
+            )
         }
     }
 }
 
-data class ArticleVMData(
-    val articles: List<ArticleData> = listOf()
+data class BookmarkListingUIState(
+    val vmData: ArticleUIData = ArticleUIData(),
+    val isEmpty: Boolean = false,
+    val isLoading: Boolean = false,
+    val bookmarkUpdated: Boolean = false,
+    val error: ArticleError? = null,
+): State
+
+data class ArticleUIData(
+    val articles: List<ArticleUiData> = listOf()
 ) {
     fun toUiData() = articles.map {
         ArticleUiData(
