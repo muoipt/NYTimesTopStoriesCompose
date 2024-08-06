@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
-import muoipt.nyt.data.common.AppLog
 import muoipt.nyt.data.common.ArticleError
 import muoipt.nyt.data.common.ArticleErrorCode
 import muoipt.nyt.data.usecases.BookmarkArticleUseCase
@@ -29,7 +28,7 @@ class ArticlesListingViewModel @Inject constructor(
 ): BaseMVIViewModel<ArticlesListingAction, ArticlesListingVMState, ArticlesListingUIState>(
     initialUIState = ArticlesListingUIState()
 ) {
-    override fun initUIState(): StateFlow<ArticlesListingUIState> {
+    public override fun initUIState(): StateFlow<ArticlesListingUIState> {
         return merge(
             loadArticles(true), actionFlow.toVMState().filterNotNull()
         ).scan(initialUIState) { currentState, partialState ->
@@ -65,12 +64,12 @@ class ArticlesListingViewModel @Inject constructor(
                     )
                 )
             }.collect { articles ->
-                AppLog.listing("loadArticles collect articles")
-                AppLog.listing(
-                    "loadArticles collect articles.first = ${
-                        articles.first().toDisplayString()
-                    }"
-                )
+//                AppLog.listing("loadArticles collect articles")
+//                AppLog.listing(
+//                    "loadArticles collect articles.first = ${
+//                        articles.first().toDisplayString()
+//                    }"
+//                )
                 emit(ArticlesListingVMState.LoadArticlesSuccess(articles))
             }
         }

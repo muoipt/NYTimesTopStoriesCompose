@@ -111,4 +111,12 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
 
     implementation(libs.coil.compose)
+
+    //test
+    testImplementation(libs.mockito.core)
+    androidTestImplementation(libs.mockito.android)
+    testImplementation(libs.androidx.core.testing)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
+
 }
