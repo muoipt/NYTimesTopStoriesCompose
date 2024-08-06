@@ -31,8 +31,8 @@ class ArticleDetailViewModel @Inject constructor(
 ) {
     override fun initUIState(): StateFlow<ArticleDetailUIState> {
         return actionFlow.toVMState().filterNotNull()
-            .scan(initialUIState) { currentState, partialState ->
-                partialState.toUIState(currentState)
+            .scan(initialUIState) { currentState, vmState ->
+                vmState.toUIState(currentState)
             }.stateIn(viewModelScope, SharingStarted.Eagerly, initialUIState)
     }
 

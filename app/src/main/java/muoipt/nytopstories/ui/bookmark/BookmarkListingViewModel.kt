@@ -34,8 +34,8 @@ class BookmarkListingViewModel @Inject constructor(
     override fun initUIState(): StateFlow<BookmarkListingUIState> {
         return merge(
             loadBookmarks(), actionFlow.toVMState().filterNotNull()
-        ).scan(initialUIState) { currentState, partialState ->
-            partialState.toUIState(currentState)
+        ).scan(initialUIState) { currentState, vmState ->
+            vmState.toUIState(currentState)
         }.stateIn(viewModelScope, SharingStarted.Eagerly, initialUIState)
     }
 
